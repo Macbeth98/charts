@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest-deployment
+  namespace: siglensent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingest-node
+  template:
+    metadata:
+      labels:
+        app: ingest-node
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - gke-hyperion-cluster-ingest-node-pool-891b8345-l0g8  # Node name
+      containers:
+      - name: ingest-container
+        image: macbeth98/sigclient:0.1.0  # Your Docker image
+        imagePullPolicy: Always
+        command: ["./sigclient"]  # Command and sub-command
+        args:
+        - "ingest"
+        - "esbulk"
+        - "-n"
+        - "20"
+        - "-g"
+        - "dynamic-user"
+        - "-d"
+        - "https://ingest.xchangetracker.com/elastic"
+        - "-p"
+        - "20"
+        - "-e"
+        - "30000000000"  # No underscores allowed in integer args
+        - "-i"
+        - "bidx"
+        - "-b"
+        - "1000"
+        - "--enableVariableNumColumns"
+        - "true"
+        - "--maxColumns"
+        - "200"

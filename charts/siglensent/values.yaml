@@ -8,14 +8,14 @@ ingress-nginx:
 cert-manager:
   namespace: siglensent
 
-queryHost: siglens.example.com
-ingestHost: ingest.siglens.example.com
+queryHost: xchangetracker.com
+ingestHost: ingest.xchangetracker.com
 
 pvc:
-  size: 20Gi
+  size: 1000G    # Size of the PVC for the Worker node
 
 storageClass:
-  diskType: pd-standard
+  diskType: pd-ssd
 
 ingestService:
   selector:
@@ -87,14 +87,26 @@ raft:
     replicas: 1 # Number of replicas for the Raft server
     ports:
       raft: 2379
+    cpu:
+      request: "1" # Request number of vCPUs for the Raft node
+      limit: "2" # Max limit of vCPUs for the Raft node
+    memory:
+      request: "2G" # Request RAM size for the Raft node
+      limit: "4G" # Max limit of RAM for the Raft node
     storage:
-      size: "10Gi"
+      size: "10Gi" #  Storage for the Raft node
 
 worker:
   deployment:
-    replicas: 3 # Number of replicas for the Worker server
+    replicas: 6 # Number of replicas for the Worker server
     ports:
       ingest: 8081
+    cpu:
+      request: "28" # Request number of vCPUs for the worker node
+      limit: "32" # Max limit of vCPUs for the worker node
+    memory:
+      request: "115G" # Request RAM size for the worker node
+      limit: "128G" # Max limit of RAM for the worker node
 
 
 registry:
